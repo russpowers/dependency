@@ -72,8 +72,10 @@
   DependencyGraphUpdate
   (depend [graph node dep]
     (when (or (= node dep) (depends? graph dep node))
-      (throw (Exception. (str "Circular dependency between "
-                              (pr-str node) " and " (pr-str dep)))))
+      (throw (#+clj Exception.
+              #+cljs js/Error.
+                     (str "Circular dependency between "
+                                     (pr-str node) " and " (pr-str dep)))))
     (MapDependencyGraph.
      (update-in dependencies [node] set-conj dep)
      (update-in dependents [dep] set-conj node)))
@@ -139,7 +141,10 @@
   the dependencies in graph. Nodes not present in the graph will sort
   after nodes in the graph."
   [graph]
-  (let [pos (zipmap (topo-sort graph) (range))]
+  (let [pos (zipmap (topo-sort graph) (range))
+        max #+clj Long/MAX_VALUE
+            #+cljs (* 4000 1024 1024) ;;4294967295
+        ]
     (fn [a b]
-      (compare (get pos a Long/MAX_VALUE)
-               (get pos b Long/MAX_VALUE)))))
+      (compare (get pos a max)
+               (get pos b max)))))
