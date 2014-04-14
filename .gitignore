@@ -1,4 +1,6 @@
 /target/
 .lein*
+/.repl
+/out
 /pom.xml
 /.nrepl-port
